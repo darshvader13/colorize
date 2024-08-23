@@ -28,7 +28,7 @@ export default function Home() {
         setLoading(true);  // Show the spinner
         setMessage('');
 
-        const attempts = 10;
+        const attempts = 20;
         for (let i = 0; i < attempts; i++) {
             console.log('Attempting to upload image... Attempt', i + 1, 'of', attempts);
             const response = await fetch('/api/upload', {
