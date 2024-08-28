@@ -15,7 +15,7 @@ export default function Home() {
         reader.onloadend = () => {
             if (typeof reader.result === 'string') {
                 let img = reader.result.split(',')[1];
-                setOriginalImage(img); // Save the original image in state
+                setOriginalImage(img);
             } else {
                 console.error('File could not be read as a string');
             }
@@ -23,50 +23,75 @@ export default function Home() {
         reader.readAsDataURL(file);
     };
 
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setLoading(true);  // Show the spinner
+        setLoading(true);
         setMessage('');
-
+    
         const attempts = 20;
-        for (let i = 1; i <= attempts; i++) {
-            console.log('Attempting to upload image... Attempt', i, 'of', attempts);
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ image: originalImage }),
-            });
-
-            const result = await response.json();
-            console.log(result);
-            if (result.error) {
-                if (i === attempts) {
-                    setMessage(result.error);
-                    break;
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * i));
+        try {
+            for (let i = 1; i <= attempts; i++) {
+                console.log('Attempting to upload image... Attempt', i, 'of', attempts);
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ image: originalImage }),
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+    
+                    const result = await response.json();
+                    console.log(result);
+                    
+                    if (result.error) {
+                        if (i === attempts) {
+                            setMessage(result.error);
+                            break;
+                        } else {
+                            await new Promise(resolve => setTimeout(resolve, 1000 * i));
+                        }
+                    } else {
+                        setProcessedImage(result.output);
+                        setMessage('Image received and processed');
+                        break;
+                    }
+                } catch (error) {
+                    console.error(`Error in attempt ${i}:`, error);
+                    if (i === attempts) {
+                        setMessage(`Failed after ${attempts} attempts. Please try again later.`);
+                    }
                 }
-            } else {
-                setProcessedImage(result.output);
-                setMessage('Image received and processed');
-                break;
+            }
+        } catch (error) {
+            console.error('Error in upload process:', error);
+            setMessage('An unexpected error occurred. Please try again later.');
+        } finally {
+            setLoading(false);
+    
+            try {
+                const response = await fetch('/api/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const result = await response.json();
+                console.log(result);
+            } catch (error) {
+                console.error('Error in stop API call:', error);
             }
         }
-
-        setLoading(false);
-
-        const response = await fetch('/api/stop', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-        });
-
-        const result = await response.json();
-        console.log(result)
     };
 
     return (

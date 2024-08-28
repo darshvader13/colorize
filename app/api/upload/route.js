@@ -4,9 +4,6 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
     const { image } = await request.json();
 
-    console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
-    console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY);
-
     const ec2 = new AWS.EC2({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
