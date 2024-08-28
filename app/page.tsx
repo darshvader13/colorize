@@ -95,7 +95,7 @@ export default function Home() {
             <h1>Colorize Manga Panel</h1>
             <form onSubmit={handleSubmit}>
                 <input type="file" accept="image/*" onChange={handleImageChange} />
-                <button type="submit" disabled={loading}>
+                <button type="submit" disabled={loading || !originalImage}>
                     {loading ? <LoadingSpinner /> : 'Upload'}
                 </button>
             </form>
