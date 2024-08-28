@@ -41,10 +41,6 @@ export default function Home() {
                         body: JSON.stringify({ image: originalImage }),
                     });
     
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-    
                     const result = await response.json();
                     console.log(result);
                     
