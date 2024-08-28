@@ -29,8 +29,8 @@ export default function Home() {
         setMessage('');
 
         const attempts = 20;
-        for (let i = 0; i < attempts; i++) {
-            console.log('Attempting to upload image... Attempt', i + 1, 'of', attempts);
+        for (let i = 1; i <= attempts; i++) {
+            console.log('Attempting to upload image... Attempt', i, 'of', attempts);
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 headers: {
@@ -42,11 +42,11 @@ export default function Home() {
             const result = await response.json();
             console.log(result);
             if (result.error) {
-                if (i === attempts - 1) {
+                if (i === attempts) {
                     setMessage(result.error);
                     break;
                 } else {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    await new Promise(resolve => setTimeout(resolve, 1000 * i));
                 }
             } else {
                 setProcessedImage(result.output);
